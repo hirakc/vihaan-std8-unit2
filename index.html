@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unit Test 2 Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a coach's clipboard for a bright 13-year-old: short, direct, game-like, never babyish.
+   IDEA: an exam campaign board: date strip on top, one timer, one mission per sitting.
+   PICTURE: the big focus timer + today's missions, then visual notes with flip cards.
+   COLOUR and TYPE: deep teal ground band, highlighter yellow accent, subject colour tags. Lexend (readability font).
+   LAYOUT: tabs (Plan, Notes, Maths lab, Parents); one column on phones. */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f7f4,#0f1716);--card:light-dark(#ffffff,#18232200);--card2:light-dark(#ffffff,#1a2625);
+--ink:light-dark(#14201f,#e9f0ee);--mute:light-dark(#53625f,#9fb2ae);--line:light-dark(#dfe5e2,#2a3a38);
+--deep:light-dark(#0d4a47,#0b3a37);--hi:#ffe14d;--ok:#1f9d63;--warn:#e08a00;--bad:#d64535;
+--hist:#b4532a;--bio:#2e8b57;--engl:#3b6fd8;--math:#7a4fd0;--lit:#c2387a;--chem:#d17a00;--phy:#0089b3;--geo:#6b8e23;--hin:#c0392b;--kan:#8d6e00}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Lexend,system-ui,sans-serif;overflow-x:clip}
+.hi-lang,[lang=hi]{font-family:"Noto Sans Devanagari",Lexend,sans-serif}
+.band{padding:clamp(20px,3.5vw,44px) max(4vw,16px)}
+.wrap{max-width:1180px;margin:0 auto}
+header.band{background:var(--deep);color:#f2fbf9;padding-bottom:18px}
+h1{font-size:clamp(28px,4.4vw,46px);line-height:1.05;margin:0 0 6px;text-wrap:balance;font-weight:800}
+h2{font-size:clamp(22px,2.6vw,30px);line-height:1.15;margin:0 0 12px}
+h3{font-size:18px;margin:18px 0 8px}
+.sub{color:#bfe0da;margin:0;max-width:62ch}
+.count{display:inline-block;margin-top:12px;background:var(--hi);color:#1b1b00;border-radius:10px;padding:6px 12px;font-weight:700}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:14px 0 4px;scroll-snap-type:x mandatory}
+.chip{flex:none;scroll-snap-align:start;border:0;border-radius:12px;padding:8px 12px;background:#ffffff1a;color:#f2fbf9;font:inherit;font-size:14px;text-align:left;cursor:pointer;min-height:44px;border-left:5px solid var(--c)}
+.chip b{display:block;font-size:13px;opacity:.8;font-weight:500}.chip.past{opacity:.45}.chip.next{background:#ffffff33;outline:2px solid var(--hi)}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:6px max(4vw,16px)}
+nav a{flex:none;text-decoration:none;color:var(--mute);font-weight:500;padding:10px 14px;border-radius:10px;min-height:44px}
+nav a.on{background:var(--deep);color:#fff}
+section[data-view]{display:none}section[data-view].on{display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+@media(max-width:820px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px}
+.timer{text-align:center;background:var(--deep);color:#fff;border:0}
+.clock{font-size:clamp(64px,12vw,112px);font-weight:800;letter-spacing:-2px;line-height:1;margin:10px 0;font-variant-numeric:tabular-nums}
+.ring{height:10px;background:#ffffff26;border-radius:6px;overflow:hidden;margin:6px 0 14px}.ring i{display:block;height:100%;background:var(--hi);width:0}
+button,.btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--ink);padding:10px 14px;min-height:44px;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.timer button{background:#ffffff1a;color:#fff;border-color:#ffffff40}.timer button.go{background:var(--hi);color:#1b1b00;border:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.task{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task input{width:22px;height:22px;margin-top:2px;accent-color:var(--ok);flex:none}
+.tag{flex:none;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:6px;padding:2px 7px;white-space:nowrap}
+.task.done span.t{text-decoration:line-through;color:var(--mute)}
+.mins{margin-left:auto;color:var(--mute);font-size:13px;white-space:nowrap;flex:none}
+.bar{height:8px;background:var(--line);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+details.day{border:1px solid var(--line);border-radius:14px;background:var(--card2);margin:10px 0}
+details.day summary{cursor:pointer;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-height:44px}
+details.day .in{padding:0 16px 10px}
+.exam{background:var(--hi);color:#1b1b00;font-weight:700;border-radius:6px;padding:2px 8px;font-size:13px}
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+.pill{flex:none;border-radius:999px;border:2px solid var(--c);background:transparent;color:var(--ink)}
+.pill.on{background:var(--c);color:#fff}
+.ready{display:grid;gap:6px;margin:8px 0 4px}
+.ready div{display:flex;gap:8px;align-items:baseline;font-size:15px}
+.dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--d);transform:translateY(1px)}
+.notes{line-height:1.6}
+.notes table{border-collapse:collapse;width:100%;margin:8px 0;font-size:15px}
+.notes th,.notes td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.notes th{background:color-mix(in srgb,var(--c) 14%,transparent)}
+.boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:8px 0}
+.box{border:1px solid var(--line);border-top:5px solid var(--c);border-radius:12px;padding:12px;background:var(--card2)}
+.box b{display:block;margin-bottom:4px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.flow span{background:color-mix(in srgb,var(--c) 15%,transparent);border-radius:8px;padding:6px 10px;font-size:15px}
+.flow em{font-style:normal;color:var(--mute)}
+.tip{background:color-mix(in srgb,var(--hi) 35%,transparent);border-radius:10px;padding:10px 12px;margin:10px 0}
+.warnbox{border-left:4px solid var(--warn);padding:8px 12px;background:color-mix(in srgb,var(--warn) 10%,transparent);border-radius:6px;margin:10px 0}
+.flash{perspective:900px;margin:8px 0}
+.fc{position:relative;height:190px;cursor:pointer;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip{transform:rotateY(180deg)}
+.fc>div{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;font-size:19px;font-weight:600}
+.fc .f{background:var(--c);color:#fff}.fc .b{background:var(--card2);border:2px solid var(--c);transform:rotateY(180deg);font-weight:500;font-size:17px}
+@media(prefers-reduced-motion:reduce){.fc{transition:none}}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin-top:6px}
+.opts button{text-align:left;font-weight:500}
+.opts button.r{background:var(--ok);color:#fff;border-color:var(--ok)}.opts button.w{background:var(--bad);color:#fff;border-color:var(--bad)}
+.why{color:var(--mute);font-size:15px;margin-top:6px}
+.links a{display:block;padding:8px 0;color:var(--engl);border-top:1px solid var(--line)}
+.links small{display:block;color:var(--mute)}
+.fig{position:relative}
+svg text{font-family:Lexend,sans-serif}
+.lab .prob{font-size:clamp(22px,4vw,32px);font-weight:700;margin:10px 0;font-variant-numeric:tabular-nums}
+input,select{font:inherit;font-size:16px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px;width:7em}
+.fb{margin-top:10px;font-weight:600}
+.check li{margin:6px 0}
+.logbars div{display:grid;grid-template-columns:9em minmax(0,1fr) 2em;gap:8px;align-items:center;font-size:14px;margin:4px 0}
+.logbars i{display:block;height:12px;background:var(--math);border-radius:4px}
+.gridmap button{padding:0;min-height:0;border-radius:0}
+.foot{color:var(--mute);font-size:14px}
+pre.letter{white-space:pre-wrap;font:15px/1.5 Lexend,sans-serif;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:12px}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;font-weight:600}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band"><div class="wrap">
+<h1>Unit Test 2: the exam campaign</h1>
+<p class="sub">Class 8, ICSE. Short 25-minute missions, tick them off, beat the date sheet. Exams run 3 to 14 December 2026.</p>
+<span class="count" id="count"></span>
+<div class="strip" id="strip"></div>
+</div></header>
+<nav><div class="wrap" id="tabs">
+<a href="#plan" data-t="plan">Plan + timer</a><a href="#notes" data-t="notes">Revision notes</a><a href="#maths" data-t="maths">Maths mistake lab</a><a href="#parents" data-t="parents">For parents</a>
+</div></nav>
+
+<main>
+<section data-view="plan" class="band"><div class="wrap">
+<div class="grid2">
+ <div class="card timer">
+  <div class="row" style="justify-content:center"><button id="m25">Focus 25</button><button id="m5">Break 5</button><button id="m15">Long break 15</button></div>
+  <div class="clock" id="clock">25:00</div>
+  <div class="ring"><i id="ring"></i></div>
+  <div class="row" style="justify-content:center"><button class="go" id="go">Start</button><button id="reset">Reset</button></div>
+  <p id="tmsg" style="margin:12px 0 0;color:#cfe9e4">Phone in another room. One mission per focus round.</p>
+ </div>
+ <div class="card">
+  <h2 id="todayH">Today's missions</h2>
+  <div id="today"></div>
+  <p class="foot" style="margin-top:10px">Overall progress</p>
+  <div class="bar"><i id="allbar"></i></div>
+  <p class="foot" id="allpct"></p>
+ </div>
+</div>
+<h2 style="margin-top:28px">Full day-by-day plan</h2>
+<p class="foot">Weekdays: 3 short missions after school. Weekends: up to 5. Each mission is 20 to 25 minutes, then a 5-minute break. The evening before each exam is always that subject.</p>
+<div id="days"></div>
+</div></section>
+
+<section data-view="notes" class="band"><div class="wrap">
+<div class="pills" id="spills"></div>
+<div id="subject"></div>
+</div></section>
+
+<section data-view="maths" class="band"><div class="wrap">
+<div class="grid2">
+ <div class="card lab">
+  <h2>Practice machine</h2>
+  <p class="foot">Fresh questions every time. Answers are always whole numbers. Use the 5-step checklist before pressing Check.</p>
+  <div class="pills" id="mmodes"></div>
+  <div class="prob" id="prob"></div>
+  <form id="mform" class="row"></form>
+  <div class="fb" id="mfb"></div>
+  <p class="foot" id="mscore"></p>
+ </div>
+ <div class="card">
+  <h2>The 5-step anti-silly-mistake routine</h2>
+  <ol class="check">
+   <li><b>Circle the ask.</b> What exactly must the answer be: x? both x and y? factors?</li>
+   <li><b>Copy check.</b> Read the question once more against what you copied. Signs and powers first.</li>
+   <li><b>One step per line.</b> Never do two moves in your head. Write the = sign under the = sign.</li>
+   <li><b>Sign watch.</b> Moving across = flips the sign. A minus before a bracket flips every sign inside.</li>
+   <li><b>Plug it back.</b> Put the answer into the ORIGINAL equation. Both sides equal? Then done.</li>
+  </ol>
+  <div class="tip">Step 5 takes about 30 seconds and catches most silly mistakes before the teacher does.</div>
+ </div>
+</div>
+<div class="card" style="margin-top:20px">
+ <h2>Mistake log</h2>
+ <p class="foot">Every time a sum goes wrong (here, in homework or in a test), log what kind of mistake it was. After a week the pattern shows you what to watch for.</p>
+ <form id="logf" class="row">
+  <select id="ltype" aria-label="Mistake type" style="width:auto"><option>Sign error</option><option>Copied wrongly</option><option>Times-table / arithmetic slip</option><option>Wrong method</option><option>Did not check</option><option>Did not finish (time)</option></select>
+  <input id="lnote" placeholder="Which sum? (optional)" style="width:min(100%,18em)">
+  <button>Add</button>
+ </form>
+ <div class="logbars" id="logbars" style="margin-top:12px"></div>
+</div>
+</div></section>
+
+<section data-view="parents" class="band"><div class="wrap notes" style="max-width:760px">
+<h2>How to run this with him</h2>
+<p>The plan is built from your portions sheet: each subject's first sitting goes to whatever your notes marked weakest, and the night before every exam belongs to that subject. Weak spots get earlier and longer slots: Quadratic Equations (not started in school), Physics Ch 8 (not studied), Valjean (not started in school), Formal Letter and Reading Comprehension (not practised).</p>
+<h3>What tends to work for a short attention span</h3>
+<ul>
+<li><b>Short and timed.</b> 25 minutes on, 5 off, using the timer on the Plan tab. Stopping on time builds trust that the session really ends.</li>
+<li><b>He teaches you.</b> After a notes card, ask him to explain it to you in 2 minutes. Explaining exposes gaps faster than rereading.</li>
+<li><b>Recall before rereading.</b> Flip cards and the quiz first, notes second. Testing yourself beats rereading, so the order matters.</li>
+<li><b>Visible wins.</b> Ticking missions off fills the progress bar. Agree a small reward for a fully ticked weekend.</li>
+<li><b>Maths: check, not speed.</b> Make "plug it back" a habit in the practice machine. Look at the mistake log together on 30 Nov and 6 Dec.</li>
+</ul>
+<h3>Things I could not verify, so please check</h3>
+<ul>
+<li><b>Textbook page limits.</b> Chemistry Ch 8 Water (pp 101 to 109) and Geography Ch 8 (till p 114): my Water and Climate notes cover what these chapters usually contain, but tick them against those exact pages.</li>
+<li><b>Civics on 3 Dec.</b> The date sheet lists only "History" on 3 Dec. The plan assumes Civics (Judiciary) is in the same paper. Worth confirming.</li>
+<li><b>Supreme Court numbers.</b> The sanctioned strength rose from 34 to 38 judges (including the CJI) in 2026. His textbook will probably still say 34. Ask the teacher which to write.</li>
+<li><b>Hindi and Kannada lessons.</b> I've given grammar notes for Hindi but no summaries of the two Hindi lessons or the Kannada lesson, because I couldn't check his textbook's text. Use the textbook for those.</li>
+<li><b>Literature versions.</b> School readers often abridge. Story maps here follow the original Conan Doyle story and the Valjean episode as described in study guides for the Class 8 reader. Match them to his textbook.</li>
+<li><b>Quadratic Equations.</b> Not started in school, so he'll need someone to teach it on 29 Nov: you, a tutor, or the Khan Academy video linked in Maths notes. Factorisation (Ch 14) is the skill it rests on.</li>
+</ul>
+<p class="foot">Progress ticks and the mistake log are saved in the browser on this device only.</p>
+</div></section>
+</main>
+
+<script>
+{
+const S={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SUB={hist:['History & Civics','--hist'],bio:['Biology','--bio'],engl:['English Language','--engl'],math:['Maths','--math'],kan:['Kannada','--kan'],lit:['English Literature','--lit'],chem:['Chemistry','--chem'],geo:['Geography','--geo'],phy:['Physics','--phy'],hin:['Hindi','--hin'],all:['Setup','--deep']};
+const EX=[['2026-12-03','Thu 3 Dec','History & Civics','hist'],['2026-12-04','Fri 4 Dec','Biology','bio'],['2026-12-05','Sat 5 Dec','English Language','engl'],['2026-12-07','Mon 7 Dec','Maths + Kannada','math'],['2026-12-08','Tue 8 Dec','English Literature','lit'],['2026-12-09','Wed 9 Dec','Chemistry','chem'],['2026-12-10','Thu 10 Dec','Geography','geo'],['2026-12-11','Fri 11 Dec','Physics','phy'],['2026-12-14','Mon 14 Dec','Hindi','hin']];
+
+/* ---------- PLAN ---------- */
+const PLAN=[
+['2026-11-24','Tue 24 Nov','',[['all',10,'Set up: pin the date sheet, open this page, phone outside the room'],['math',25,'Linear Equations (Ch 15): 10 sums from the Practice machine, using the 5-step routine'],['hist',25,'Ch 7 Expansion of British Power: read notes, then flip cards']]],
+['2026-11-25','Wed 25 Nov','',[['hist',25,'Ch 9 Great Uprising: the 4 causes + the spark (notes)'],['hist',25,'Ch 9: timeline + who led where, then flip cards'],['math',20,'Coordinate graph (Ch 22): plot y = 2x + 1 and y = 3 − x on graph paper']]],
+['2026-11-26','Thu 26 Nov','',[['hist',25,'Ch 11 Rise of Indian Nationalism: whatever has been taught so far'],['hist',25,'Civics Ch 14 Judiciary: Supreme Court boxes + flip cards'],['math',20,'Simultaneous equations (Ex 23A): 5 sums by elimination']]],
+['2026-11-27','Fri 27 Nov','',[['bio',25,'Ch 2 Asexual reproduction: the 5 types with examples'],['bio',25,'Vegetative propagation: natural (root, stem, leaf) + artificial methods'],['math',20,'Factorisation (Ch 14): 8 sums, one method each']]],
+['2026-11-28','Sat 28 Nov','',[['bio',25,'The Flower: draw and label from memory, check against diagram'],['bio',25,'Pollination: self vs cross, wind / insect / water examples'],['engl',25,'Direct and Indirect Speech: 10 sentences + quiz'],['engl',25,'Formal letter #1: write one using the template'],['math',25,'Simultaneous equations: 5 more from the Practice machine']]],
+['2026-11-29','Sun 29 Nov','',[['math',25,'Quadratic Equations: learn it (watch the 6-min Khan video with a parent)'],['math',25,'Quadratic Equations: 8 sums from the Practice machine'],['engl',25,'Reading comprehension: one passage, timed, using the 4-step method'],['hist',25,'History & Civics: full quiz, redo every wrong card'],['lit',20,'Story time: read "Valjean Takes a Risk" from the textbook']]],
+['2026-11-30','Mon 30 Nov','',[['hist',25,'Write 3 long answers: causes of 1857, results of 1857, Supreme Court jurisdiction'],['bio',25,'Biology flip cards + quiz, redo wrong ones'],['kan',20,'Kannada Lesson 5: word meanings + 5 sentences'],['math',10,'Parent check-in: look at the mistake log together']]],
+['2026-12-01','Tue 1 Dec','',[['hist',25,'Ch 11 + Civics: flip cards until all are "got it"'],['engl',25,'Formal letter #2, timed (20 min), check format against template'],['kan',20,'Kannada grammar + number names 141 to 160 (say aloud, write)']]],
+['2026-12-02','Wed 2 Dec','',[['hist',25,'History & Civics: final quiz + weakest flip cards'],['hist',20,'Read the timeline aloud once. Early night.'],['bio',20,'Biology: one quick read of flower and pollination notes']]],
+['2026-12-03','Thu 3 Dec','hist',[['bio',25,'Biology final: asexual + vegetative flip cards'],['bio',25,'Biology final: flower diagram from memory + pollination quiz']]],
+['2026-12-04','Fri 4 Dec','bio',[['engl',25,'English Language final: speech changes + prepositions quiz'],['engl',25,'One reading comprehension passage + read your two letters again']]],
+['2026-12-05','Sat 5 Dec','engl',[['math',25,'Maths mixed: 3 of each type in the Practice machine'],['math',25,'Quadratics + simultaneous: the ones you got wrong before'],['phy',25,'Physics first look: charges + play with the PhET balloon simulation'],['kan',20,'Kannada: lesson questions + opposites + gender']]],
+['2026-12-06','Sun 6 Dec','',[['math',45,'Maths mock: 45 min, timed, 5-step routine on every sum'],['math',25,'Mark the mock, log every mistake, redo them'],['kan',25,'Kannada final revision'],['lit',25,'Read "The Adventure of the Speckled Band" story map + clue chain']]],
+['2026-12-07','Mon 7 Dec','math',[['lit',25,'Literature: Valjean + Speckled Band character cards'],['lit',25,'To the Cuckoo: meaning stanza by stanza + poetic devices'],['lit',15,'Literature quiz']]],
+['2026-12-08','Tue 8 Dec','lit',[['chem',25,'Chemistry Ch 6: reaction types + exo/endothermic'],['chem',25,'Chemistry Ch 8 Water (pp 101 to 109) with textbook open'],['phy',20,'Physics: electroscope + lightning']]],
+['2026-12-09','Wed 9 Dec','chem',[['geo',25,'Topo map: grid reference game + colours and symbols'],['geo',20,'Settlements, drainage patterns, contours'],['geo',25,'Ch 8 India Climate (till p 114)']]],
+['2026-12-10','Thu 10 Dec','geo',[['phy',25,'Physics: charges, conductors, insulators, conservation of charge'],['phy',25,'Electrical energy and power: 5 numericals (kWh)'],['phy',25,'Electricity at home + safety, then the quiz']]],
+['2026-12-11','Fri 11 Dec','phy',[['hin',25,'Hindi: पाठ 9 हाथों का मूल्य, read + question-answers']]],
+['2026-12-12','Sat 12 Dec','',[['hin',25,'Hindi: पाठ 11 सर विलियम जोंस ने संस्कृत कैसे सीखी, read + Q/A'],['hin',25,'कारक + क्रियाविशेषण: notes + flip cards'],['hin',25,'विलोम, पर्यायवाची, अनेक शब्दों के लिए एक शब्द'],['hin',25,'Picture composition: write one (8 to 10 lines)']]],
+['2026-12-13','Sun 13 Dec','',[['hin',25,'Unseen passage practice'],['hin',25,'Hindi quiz + wrong cards again'],['hin',15,'Quick read of both lessons. Early night.']]],
+['2026-12-14','Mon 14 Dec','hin',[['all',5,'Last exam. Done!']]]
+];
+const done=S.get('ut2.done',{});
+const today=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+const tag=k=>`<span class="tag" style="--c:var(${SUB[k][1]})">${esc(SUB[k][0])}</span>`;
+const taskHTML=(d,i,t)=>{const id=d+'-'+i;const on=!!done[id];return `<label class="task${on?' done':''}"><input type="checkbox" data-id="${id}"${on?' checked':''}>${tag(t[0])}<span class="t">${esc(t[2])}</span><span class="mins">${t[1]} min</span></label>`};
+const examOf=k=>EX.find(e=>e[3]===k);
+function renderPlan(){
+ let tot=0,dn=0;
+ document.getElementById('days').innerHTML=PLAN.map(([d,lab,ex,ts])=>{
+  const c=ts.filter((t,i)=>done[d+'-'+i]).length;tot+=ts.length;dn+=c;
+  const e=ex?`<span class="exam">Exam today: ${esc(examOf(ex)[2])}</span>`:'';
+  return `<details class="day"${d===today?' open':''}><summary><b>${lab}</b>${e}<span class="mins">${c}/${ts.length} done</span></summary><div class="in">${ts.map((t,i)=>taskHTML(d,i,t)).join('')}</div></details>`}).join('');
+ let td=PLAN.find(p=>p[0]===today)||(today<PLAN[0][0]?PLAN[0]:null);
+ const tEl=document.getElementById('today');
+ if(td){document.getElementById('todayH').textContent=(td[0]===today?'Today':'First day')+': '+td[1];tEl.innerHTML=(td[2]?`<p><span class="exam">Exam today: ${esc(examOf(td[2])[2])}</span> After it, the next missions:</p>`:'')+td[3].map((t,i)=>taskHTML(td[0],i,t)).join('')}
+ else{document.getElementById('todayH').textContent='Campaign complete';tEl.innerHTML='<p>All exams are over. Well done.</p>'}
+ const p=tot?Math.round(dn/tot*100):0;document.getElementById('allbar').style.width=p+'%';document.getElementById('allpct').textContent=dn+' of '+tot+' missions done ('+p+'%)';
+}
+document.addEventListener('change',e=>{const id=e.target.dataset&&e.target.dataset.id;if(!id)return;done[id]=e.target.checked;S.set('ut2.done',done);renderPlan()});
+
+/* header strip + countdown */
+const next=EX.find(e=>e[0]>=today);
+document.getElementById('strip').innerHTML=EX.map(e=>`<button class="chip${e[0]<today?' past':''}${next&&e[0]===next[0]?' next':''}" style="--c:var(${SUB[e[3]][1]})" data-s="${e[3]}"><b>${e[1]}</b>${esc(e[2])}</button>`).join('');
+if(next){const ms=new Date(next[0]+'T00:00:00')-new Date(today+'T00:00:00');const n=Math.round(ms/864e5);document.getElementById('count').textContent=n===0?'Today: '+next[2]+'. You have got this.':'Next exam: '+next[2]+' in '+n+' day'+(n>1?'s':'')}
+else document.getElementById('count').textContent='All exams done';
+document.getElementById('strip').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){cur=b.dataset.s;location.hash='notes';renderSubject()}});
+
+/* ---------- TIMER ---------- */
+let total=1500,left=1500,tick=null,actx=null;
+const clock=document.getElementById('clock'),ring=document.getElementById('ring'),go=document.getElementById('go'),tmsg=document.getElementById('tmsg');
+const show=()=>{clock.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');ring.style.width=((total-left)/total*100)+'%'};
+const beep=()=>{try{if(!actx)return;[0,0.35,0.7].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.15,actx.currentTime+t);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+0.2)})}catch(e){}};
+const setM=m=>{clearInterval(tick);tick=null;total=left=m*60;go.textContent='Start';tmsg.textContent=m===25?'Phone in another room. One mission per focus round.':'Break: stand up, water, stretch. No screens.';show()};
+go.onclick=()=>{try{actx=actx||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
+ if(tick){clearInterval(tick);tick=null;go.textContent='Resume';return}
+ go.textContent='Pause';tick=setInterval(()=>{left--;show();if(left<=0){clearInterval(tick);tick=null;go.textContent='Start';beep();tmsg.textContent=total===1500?'Round done. Tick your mission, then take a 5-minute break.':'Break over. Next mission.';left=total}},1000)};
+document.getElementById('reset').onclick=()=>setM(total/60);
+document.getElementById('m25').onclick=()=>setM(25);document.getElementById('m5').onclick=()=>setM(5);document.getElementById('m15').onclick=()=>setM(15);
+show();
+
+/* ---------- NOTES DATA ---------- */
+const G='var(--ok)',A='var(--warn)',R='var(--bad)',N='var(--mute)';
+const D={
+hist:{ready:[[G,'Ch 7 Expansion of British Power: revised, confident'],[A,'Ch 9 Great Uprising of 1857: taught, not revised'],[R,'Ch 11 Rise of Indian Nationalism: being taught now'],[A,'Civics Ch 14 Judiciary: taught, not revised']],
+scope:'History: Ch 7 (expansionist strategies only), Ch 9, Ch 11. Civics: Ch 14 Organs of the Government (Judiciary only).',
+notes:`<h3>Ch 7: four ways the Company grabbed land</h3>
+<div class="boxes"><div class="box"><b>Ring-fence policy</b>Warren Hastings. Defend the borders of friendly neighbours so that they act as a buffer around Company land.</div>
+<div class="box"><b>Subsidiary Alliance (1798)</b>Lord Wellesley. Indian ruler keeps British troops and pays for them, accepts a British Resident, and makes no deals with others without British consent. First to sign: Hyderabad.</div>
+<div class="box"><b>Doctrine of Lapse</b>Lord Dalhousie. If a ruler died without a natural son, the state "lapsed" to the Company. Satara 1848, Jhansi 1853, Nagpur 1854.</div>
+<div class="box"><b>Annexation for "misgovernance"</b>Dalhousie took Awadh in 1856, saying it was badly ruled. Also wars: Anglo-Mysore, Anglo-Maratha, Anglo-Sikh (Punjab, 1849).</div></div>
+<h3>Ch 9: why 1857 happened (remember P-E-S-M + the spark)</h3>
+<div class="flow"><span><b>P</b>olitical: Lapse, Awadh, insults to Bahadur Shah Zafar, Nana Saheb's pension stopped</span><span><b>E</b>conomic: heavy land revenue, ruined handicrafts</span><span><b>S</b>ocial-religious: fear of forced conversion, laws seen as interference</span><span><b>M</b>ilitary: low pay, no promotion, made to serve overseas</span><em>→</em><span><b>Spark:</b> greased cartridges of the new Enfield rifle</span></div>
+<h3>Timeline</h3>
+<table class="stack"><tr><th>When</th><th>What</th></tr>
+<tr><td>29 Mar 1857</td><td>Mangal Pandey attacks officers at Barrackpore</td></tr>
+<tr><td>10 May 1857</td><td>Sepoys rise at Meerut, march to Delhi</td></tr>
+<tr><td>11 May 1857</td><td>Bahadur Shah Zafar proclaimed leader at Delhi</td></tr>
+<tr><td>Sep 1857</td><td>British recapture Delhi</td></tr>
+<tr><td>Jun 1858</td><td>Rani Lakshmibai dies fighting near Gwalior</td></tr>
+<tr><td>Aug 1858</td><td>Government of India Act: Company rule ends</td></tr>
+<tr><td>1 Nov 1858</td><td>Queen Victoria's Proclamation</td></tr></table>
+<h3>Who led where</h3>
+<table class="stack"><tr><th>Place</th><th>Leader</th></tr><tr><td>Delhi</td><td>Bahadur Shah Zafar (army: Bakht Khan)</td></tr><tr><td>Kanpur</td><td>Nana Saheb, Tantia Tope</td></tr><tr><td>Lucknow</td><td>Begum Hazrat Mahal</td></tr><tr><td>Jhansi</td><td>Rani Lakshmibai</td></tr><tr><td>Bihar (Jagdishpur)</td><td>Kunwar Singh</td></tr></table>
+<h3>Results and why it failed</h3>
+<div class="boxes"><div class="box"><b>Results</b>Crown takes over (Act of 1858). Governor-General becomes Viceroy. Secretary of State for India. Army reorganised. Annexation policy dropped.</div><div class="box"><b>Why it failed</b>Limited to some regions, no common plan or leader, poor weapons, many rulers and the educated class stayed away, British had better communication.</div></div>
+<h3>Ch 11: what woke up nationalism</h3>
+<div class="flow"><span>One administration, one law</span><span>Western education + English</span><span>Railways, post, telegraph</span><span>Press and literature</span><span>Rediscovery of India's past</span><span>Economic drain</span><span>Racial discrimination (Ilbert Bill, 1883)</span><span>Lord Lytton: Vernacular Press Act 1878, Arms Act 1878</span></div>
+<p><b>Early associations:</b> British Indian Association (1851), East India Association (1866, Dadabhai Naoroji, London), Poona Sarvajanik Sabha (1870), Indian Association (1876, Surendranath Banerjee), Madras Mahajan Sabha (1884).<br><b>Indian National Congress:</b> 28 Dec 1885, Bombay. Founded with A.O. Hume's help. First president W.C. Bonnerjee. 72 delegates.</p>
+<div class="warnbox">Ch 11 is still being taught. Learn only what the teacher has covered by 1 Dec.</div>
+<h3>Civics Ch 14: the Judiciary</h3>
+<div class="boxes"><div class="box"><b>Supreme Court</b>New Delhi. Chief Justice + other judges, appointed by the President. Retire at 65. Removed only by impeachment (special majority in both Houses).</div>
+<div class="box"><b>Qualifications</b>Citizen of India, and 5 years as a High Court judge, or 10 years as a High Court advocate, or a distinguished jurist in the President's view.</div>
+<div class="box"><b>Jurisdiction</b>Original (disputes between Centre and States). Appellate (appeals). Advisory (Art 143). Writ (Art 32, protects Fundamental Rights). Court of Record (Art 129).</div>
+<div class="box"><b>High Courts and below</b>High Court judges retire at 62. Below them: district and subordinate courts. Lok Adalats settle cases quickly and cheaply.</div></div>
+<div class="warnbox">Number of judges: raised from 34 to 38 (including the Chief Justice) in 2026. Your book may say 34. Ask your teacher which to write.</div>`,
+cards:[['Who introduced the Subsidiary Alliance?','Lord Wellesley, 1798. First state: Hyderabad.'],['Doctrine of Lapse: who and what?','Lord Dalhousie. No natural heir = the state "lapses" to the Company. Satara, Jhansi, Nagpur.'],['When and why was Awadh annexed?','1856, on the excuse of misgovernance.'],['Immediate cause of 1857?','Greased cartridges of the Enfield rifle.'],['Where did the revolt begin on 10 May 1857?','Meerut'],['Mangal Pandey: where and when?','Barrackpore, 29 March 1857'],['Leaders: Jhansi, Lucknow, Kanpur, Bihar?','Rani Lakshmibai, Begum Hazrat Mahal, Nana Saheb (with Tantia Tope), Kunwar Singh'],['Main change made by the Act of 1858?','Company rule ended, the British Crown took over, Viceroy, Secretary of State for India.'],['When and where was the INC founded?','28 December 1885, Bombay. First president W.C. Bonnerjee.'],['Vernacular Press Act?','1878, Lord Lytton. Gagged Indian-language newspapers.'],['Ilbert Bill?','1883. Let Indian judges try Europeans. British protests showed racial discrimination.'],['Retirement age: Supreme Court and High Court?','65 and 62'],['Which Article gives the Supreme Court writ power?','Article 32'],['Advisory jurisdiction?','Article 143. The President can ask the Supreme Court for its opinion.']],
+quiz:[['Doctrine of Lapse was introduced by:',['Lord Wellesley','Lord Dalhousie','Warren Hastings','Lord Lytton'],1,'Dalhousie used it to take Satara, Jhansi and Nagpur.'],['First state to accept the Subsidiary Alliance:',['Mysore','Awadh','Hyderabad','Punjab'],2,'Hyderabad, 1798.'],['The revolt of 1857 began at:',['Delhi','Meerut','Kanpur','Lucknow'],1,'10 May 1857.'],['Kunwar Singh led the revolt in:',['Bihar','Jhansi','Delhi','Awadh'],0,'Jagdishpur, Bihar.'],['First president of the INC:',['A.O. Hume','Dadabhai Naoroji','W.C. Bonnerjee','Surendranath Banerjee'],2,'Bombay session, 1885.'],['A Supreme Court judge retires at:',['60','62','65','70'],2,'High Court judges retire at 62.']],
+links:[['https://en.wikipedia.org/wiki/Indian_Rebellion_of_1857','Indian Rebellion of 1857 (Wikipedia)','Extra reading for curious minds. More detail than the test needs.'],['https://www.barandbench.com/news/law-policy/president-gives-assent-to-law-increasing-number-of-supreme-court-judges-from-33-to-37','Supreme Court strength raised to 38 (Bar & Bench)','For parents: the 2026 change behind the judge-count note.']]},
+
+bio:{ready:[[A,'Ch 2 Asexual and Vegetative Reproduction (pp 15 to 21): revised, not confident'],[G,'Handout: The Flower: revised, confident'],[A,'Handout: Pollination and Fertilisation (till examples of pollination): taught, not revised']],
+scope:'Ch 2 Asexual and Vegetative Reproduction in Plants (pages 15 to 21). Handout: The Flower. Handout: Pollination and Fertilisation, only up to examples of pollination.',
+notes:`<h3>Asexual reproduction: one parent, identical copies</h3>
+<table class="stack"><tr><th>Type</th><th>What happens</th><th>Example</th></tr>
+<tr><td>Fission</td><td>One cell splits into two (binary) or many (multiple)</td><td>Amoeba (binary), Plasmodium (multiple)</td></tr>
+<tr><td>Budding</td><td>A small bud grows on the parent, then breaks off</td><td>Yeast, Hydra</td></tr>
+<tr><td>Fragmentation</td><td>Body breaks into pieces, each grows into a new one</td><td>Spirogyra</td></tr>
+<tr><td>Spore formation</td><td>Tiny spores released, each grows into a new plant</td><td>Rhizopus (bread mould), ferns, mosses</td></tr>
+<tr><td>Regeneration</td><td>A lost part regrows into a full organism</td><td>Planaria</td></tr></table>
+<h3>Vegetative propagation: new plants from root, stem or leaf</h3>
+<div class="boxes"><div class="box"><b>Roots</b>Sweet potato, dahlia</div><div class="box"><b>Stems</b>Potato tuber ("eyes" are buds), ginger rhizome, onion bulb, strawberry runner</div><div class="box"><b>Leaves</b>Bryophyllum: buds in the notches of the leaf edge</div></div>
+<div class="boxes"><div class="box"><b>Cutting</b>Plant a cut stem piece. Rose, sugarcane.</div><div class="box"><b>Layering</b>Bend a branch into soil, let it root, then cut it off. Jasmine.</div><div class="box"><b>Grafting</b>Join a cut shoot (scion) onto a rooted plant (stock). Mango.</div><div class="box"><b>Tissue culture</b>Grow many plants from a few cells in a lab.</div></div>
+<div class="flow"><span>✔ Quick, plants identical to parent, seedless plants (banana) possible</span><span>✘ No variation, crowding, a disease can wipe out all</span></div>
+<h3>The Flower</h3>
+<div class="fig"><svg viewBox="0 0 520 300" role="img" aria-label="Labelled flower diagram">
+<line x1="260" y1="300" x2="260" y2="190" stroke="#2e8b57" stroke-width="8"/>
+<path d="M170 200 Q260 245 350 200 L330 185 Q260 215 190 185Z" fill="#7cc576"/>
+<ellipse cx="190" cy="140" rx="40" ry="70" transform="rotate(-35 190 140)" fill="#f7a8c4" opacity=".85"/>
+<ellipse cx="330" cy="140" rx="40" ry="70" transform="rotate(35 330 140)" fill="#f7a8c4" opacity=".85"/>
+<path d="M232 190 Q260 150 288 190 Q260 205 232 190Z" fill="#cfe8a8" stroke="#2e8b57"/>
+<ellipse cx="260" cy="183" rx="14" ry="12" fill="#9ad08a"/><circle cx="255" cy="184" r="3" fill="#fff"/><circle cx="265" cy="182" r="3" fill="#fff"/>
+<line x1="260" y1="172" x2="260" y2="95" stroke="#2e8b57" stroke-width="4"/><ellipse cx="260" cy="90" rx="10" ry="6" fill="#2e8b57"/>
+<line x1="235" y1="185" x2="215" y2="105" stroke="#c9a227" stroke-width="2"/><ellipse cx="213" cy="100" rx="6" ry="10" fill="#e3b505"/>
+<line x1="285" y1="185" x2="305" y2="105" stroke="#c9a227" stroke-width="2"/><ellipse cx="307" cy="100" rx="6" ry="10" fill="#e3b505"/>
+<g font-size="14" fill="currentColor">
+<text x="275" y="70">Stigma</text><line x1="272" y1="74" x2="262" y2="86" stroke="currentColor"/>
+<text x="290" y="140">Style</text>
+<text x="380" y="190">Ovary + ovules</text><line x1="378" y1="186" x2="275" y2="183" stroke="currentColor"/>
+<text x="120" y="80">Anther</text><line x1="168" y1="80" x2="206" y2="98" stroke="currentColor"/>
+<text x="110" y="135">Filament</text><line x1="172" y1="132" x2="222" y2="140" stroke="currentColor"/>
+<text x="400" y="110">Petal</text><line x1="398" y1="108" x2="360" y2="120" stroke="currentColor"/>
+<text x="380" y="240">Sepal</text><line x1="378" y1="236" x2="340" y2="205" stroke="currentColor"/>
+<text x="270" y="285">Stalk (pedicel)</text></g></svg></div>
+<table class="stack"><tr><th>Whorl</th><th>Made of</th><th>Job</th></tr><tr><td>Calyx</td><td>Sepals</td><td>Protects the bud</td></tr><tr><td>Corolla</td><td>Petals</td><td>Attracts insects</td></tr><tr><td>Androecium (male)</td><td>Stamens = anther + filament</td><td>Anther makes pollen</td></tr><tr><td>Gynoecium (female)</td><td>Pistil / carpel = stigma + style + ovary</td><td>Ovary holds ovules</td></tr></table>
+<p>Bisexual flower: has both stamens and pistil (hibiscus, mustard). Unisexual: only one (papaya, cucumber).</p>
+<h3>Pollination = pollen moves from anther to stigma</h3>
+<div class="boxes"><div class="box"><b>Self-pollination</b>Same flower or another flower on the same plant.</div><div class="box"><b>Cross-pollination</b>Flower of another plant of the same kind. Gives variety.</div></div>
+<table class="stack"><tr><th>Agent</th><th>Flower features</th><th>Example</th></tr><tr><td>Insects</td><td>Bright, scented, nectar, sticky pollen</td><td>Sunflower, salvia</td></tr><tr><td>Wind</td><td>Small, dull, no scent, light dry pollen in huge amounts, feathery stigma</td><td>Maize, grasses</td></tr><tr><td>Water</td><td>Pollen floats</td><td>Vallisneria</td></tr><tr><td>Birds</td><td>Bright, lots of nectar</td><td>Bottlebrush</td></tr></table>`,
+cards:[['Binary fission example?','Amoeba'],['Budding examples?','Yeast and Hydra'],['Fragmentation example?','Spirogyra'],['Spore formation example?','Rhizopus (bread mould)'],['Regeneration example?','Planaria'],['A potato is which plant part?','A stem tuber. Its "eyes" are buds.'],['Bryophyllum reproduces using?','Leaves: buds in the leaf-edge notches'],['Grafting: stock vs scion?','Stock = rooted lower plant. Scion = cut shoot joined on top.'],['Male part of a flower?','Stamen = anther + filament'],['Female part?','Pistil (carpel) = stigma + style + ovary'],['Define pollination','Transfer of pollen from anther to stigma'],['Wind-pollinated flower features?','Small, dull, no scent, light dry pollen in large amounts, feathery stigma'],['Water-pollinated example?','Vallisneria']],
+quiz:[['Yeast reproduces by:',['Fission','Budding','Fragmentation','Spores'],1,'A bud grows and breaks away.'],['Bread mould (Rhizopus) reproduces by:',['Spores','Budding','Regeneration','Grafting'],0,'Spores float in air.'],['Potato is a modified:',['Root','Stem','Leaf','Fruit'],1,'Stem tuber with buds ("eyes").'],['Pollen is made in the:',['Stigma','Ovary','Anther','Sepal'],2,'Anther sits on the filament.'],['Maize is pollinated by:',['Insects','Water','Wind','Birds'],2,'Light, dry pollen; feathery stigma.'],['Mango plants are commonly propagated by:',['Grafting','Fission','Spores','Fragmentation'],0,'Scion joined onto a stock.']],
+links:[['https://www.khanacademy.org/science/class-7-science/x0c8b40bd4b242f0b:reproduction-in-plants/x0c8b40bd4b242f0b:types-of-reproduction/v/vegetative-propagation','Vegetative propagation (Khan Academy, about 3 min)','Short video on what it is and why it helps.'],['https://thenational.academy/pupils/lessons/pollination/video','Pollination lesson (Oak National Academy)','Simple, clear video with check questions.']]},
+
+engl:{ready:[[G,'Direct and Indirect Speech: revised'],[G,'Prepositions: revised'],[R,'Formal Letter: not practised'],[R,'Reading Comprehension: not practised']],
+scope:'Grammar: Direct and Indirect Speech, Prepositions. Writing: Formal Letter. Reading Comprehension.',
+notes:`<h3>Direct to indirect: when the reporting verb is past ("said")</h3>
+<table class="stack"><tr><th>Direct</th><th>Indirect</th></tr><tr><td>is / am / are</td><td>was / were</td></tr><tr><td>do / does</td><td>did</td></tr><tr><td>did (simple past)</td><td>had + verb (past perfect)</td></tr><tr><td>has / have done</td><td>had done</td></tr><tr><td>will / can / may</td><td>would / could / might</td></tr><tr><td>now / today / tonight</td><td>then / that day / that night</td></tr><tr><td>tomorrow / yesterday</td><td>the next day / the previous day</td></tr><tr><td>here / this / these / ago</td><td>there / that / those / before</td></tr></table>
+<div class="tip">Universal truths do not change: He said, "The sun rises in the east." → He said that the sun rises in the east.</div>
+<div class="boxes"><div class="box"><b>Statement</b>She said, "I am tired." → She said that she was tired.</div><div class="box"><b>Yes/no question</b>He said, "Are you coming?" → He asked if I was coming.</div><div class="box"><b>Wh- question</b>She said, "Where do you live?" → She asked where I lived. (No question mark, statement order.)</div><div class="box"><b>Command / request</b>"Shut the door." → He told me to shut the door. "Please help me." → She requested me to help her. "Don't run." → He told us not to run.</div><div class="box"><b>Exclamation</b>"What a lovely day!" → She exclaimed with joy that it was a lovely day.</div></div>
+<h3>Prepositions</h3>
+<div class="boxes"><div class="box"><b>Time</b>AT a point: at 5 pm. ON a day/date: on Monday. IN a longer period: in May, in 2026.</div><div class="box"><b>Movement</b>into (enter), onto (land on top), towards (direction), across (side to side), through (inside, end to end).</div><div class="box"><b>Common traps</b>between (2) / among (3+); since (a point: since Monday) / for (a period: for 3 days); beside (next to) / besides (as well as).</div></div>
+<h3>Formal letter: the skeleton (filled-in example)</h3>
+<pre class="letter">12, Lake View Road            ← sender's address
+Bengaluru 560001
+25 November 2026              ← date
+
+The Principal                 ← receiver
+(name of your school)
+Bengaluru
+
+Subject: Request to start an astronomy club   ← one line, the point
+
+Sir/Madam,
+
+Para 1: who you are + why you are writing (2 lines).
+Para 2: the details: what, when, how many students, who will guide.
+Para 3: the request + thanks.
+
+Yours faithfully,
+(Your name)
+Class 8</pre>
+<div class="tip">Formal = no slang, no contractions (write "I am", not "I'm"). "Sir/Madam" goes with "Yours faithfully".</div>
+<h3>Reading comprehension: the 4-step method</h3>
+<div class="flow"><span>1. Read the questions first</span><em>→</em><span>2. Read the passage, underline answers</span><em>→</em><span>3. Answer in your own words, full sentences</span><em>→</em><span>4. Check the mark count = number of points</span></div>`,
+cards:[['"now" becomes?','then'],['"today" becomes?','that day'],['"tomorrow" becomes?','the next day / the following day'],['"yesterday" becomes?','the previous day / the day before'],['"ago" becomes?','before'],['"will" becomes?','would'],['"can" becomes?','could'],['Simple past "went" becomes?','had gone (past perfect)'],['A universal truth in indirect speech?','Tense does not change'],['Command: "Sit down." He said.','He told me to sit down.'],['between or among: 2 people?','between'],['since or for: "___ three days"?','for (a period)'],['Close a "Sir/Madam" letter with?','Yours faithfully']],
+quiz:[['He said, "I am busy."',['He said that he is busy.','He said that he was busy.','He told that I was busy.','He said that I am busy.'],1,'am → was, I → he.'],['She said, "Where do you live?"',['She asked where did I live.','She asked where I lived.','She asked where I live?','She said where I lived.'],1,'Statement order, no question mark.'],['"Don’t touch it," he said to me.',['He told me to not touch it.','He told me not to touch it.','He said me not touch it.','He asked me don’t touch it.'],1,'Negative command → not to + verb.'],['The train arrives ___ 6 pm.',['in','on','at','by'],2,'A point of time → at.'],['Divide the sweets ___ the five children.',['between','among','with','in'],1,'More than two → among.']],
+links:[['https://learnenglishteens.britishcouncil.org/grammar/b1-b2-grammar/reported-speech','Reported speech (British Council LearnEnglish Teens)','Short video + interactive exercises.']]},
+
+math:{ready:[[G,'Ch 15 Linear Equations: revised once, confident'],[G,'Ch 22 Coordinate System and Linear Graph: revised once, confident'],[N,'Ch 14 Factorisation: no note on your sheet'],[A,'Simultaneous Equations (Ex 23A): needs more practice'],[R,'Quadratic Equations: not started in school']],
+scope:'Ch 15 Linear Equations, Ch 22 Coordinate System and Linear Graph, Ch 14 Factorisation, Handout: Simultaneous Equations (Ex 23A only), Handout: Quadratic Equations.',
+notes:`<div class="tip">Practise in the <a href="#maths">Maths mistake lab</a>. Every sum: circle the ask, copy check, one step per line, sign watch, plug it back.</div>
+<h3>Linear equations: keep the balance</h3>
+<div class="flow"><span>3x + 5 = x + 13</span><em>→ move x left (sign flips)</em><span>3x − x = 13 − 5</span><em>→</em><span>2x = 8</span><em>→</em><span>x = 4</span><em>check:</em><span>17 = 17 ✔</span></div>
+<p>Brackets with a minus: −2(x − 3) = −2x <b>+ 6</b>. The sign of every term inside flips.</p>
+<h3>Coordinates and graphs</h3>
+<div class="fig"><svg viewBox="0 0 320 240" role="img" aria-label="Four quadrants with signs">
+<line x1="20" y1="120" x2="300" y2="120" stroke="currentColor"/><line x1="160" y1="10" x2="160" y2="230" stroke="currentColor"/>
+<g font-size="15" fill="currentColor" text-anchor="middle"><text x="235" y="65">I (+, +)</text><text x="85" y="65">II (−, +)</text><text x="85" y="185">III (−, −)</text><text x="235" y="185">IV (+, −)</text><text x="296" y="112">x</text><text x="170" y="22">y</text><text x="150" y="136">O</text></g></svg></div>
+<p>Point (x, y): go across first, then up or down. Any point on the x-axis has y = 0; on the y-axis x = 0.<br><b>Drawing a line graph:</b> make a table with 3 values of x, find y, plot, join with a ruler. If 3 points don't line up, one is wrong.</p>
+<h3>Factorisation: which tool?</h3>
+<div class="flow"><span>1. Common factor? 6x² + 9x = 3x(2x + 3)</span><em>→</em><span>2. Four terms? Grouping</span><em>→</em><span>3. a² − b²? = (a + b)(a − b)</span><em>→</em><span>4. x² + bx + c? Find two numbers: product c, sum b</span></div>
+<p>Example: x² + 7x + 12 → 3 × 4 = 12 and 3 + 4 = 7 → (x + 3)(x + 4). Check by multiplying back.</p>
+<h3>Simultaneous equations by elimination</h3>
+<div class="flow"><span>x + y = 10<br>x − y = 4</span><em>add →</em><span>2x = 14, x = 7</span><em>put back →</em><span>7 + y = 10, y = 3</span><em>check in BOTH:</em><span>10 ✔ and 4 ✔</span></div>
+<p>If no variable cancels directly, multiply one or both equations so the coefficients match, then add or subtract.</p>
+<h3>Quadratic equations (new topic)</h3>
+<div class="flow"><span>x² − 5x + 6 = 0</span><em>factorise →</em><span>(x − 2)(x − 3) = 0</span><em>one bracket must be 0 →</em><span>x = 2 or x = 3</span></div>
+<p>Always get "= 0" on one side first. A quadratic usually has two answers; give both.</p>`,
+cards:[['Move +5 across the = sign. It becomes?','−5'],['−3(x − 4) expands to?','−3x + 12'],['Signs in quadrant III?','(−, −)'],['y-coordinate of any point on the x-axis?','0'],['a² − b² = ?','(a + b)(a − b)'],['x² + bx + c: what two numbers do you look for?','Product = c, sum = b'],['Elimination: first step?','Make one variable\'s coefficients equal, then add or subtract'],['Last step of EVERY equation?','Plug the answer back into the original'],['Solve (x − 4)(x + 1) = 0','x = 4 or x = −1'],['How many points to draw a straight-line graph safely?','3 (the third is a check)']],
+quiz:[['Solve 4x − 7 = 2x + 5',['x = 1','x = 6','x = −6','x = 2'],1,'2x = 12.'],['Factorise x² − 9',['(x − 3)²','(x + 3)(x − 3)','(x − 9)(x + 1)','x(x − 9)'],1,'Difference of squares.'],['(−3, 5) lies in quadrant:',['I','II','III','IV'],1,'x negative, y positive.'],['x + y = 9, x − y = 1. x = ?',['4','5','8','10'],1,'Add: 2x = 10.'],['Solve x² − 7x + 10 = 0',['2 and 5','−2 and −5','1 and 10','−1 and −10'],0,'(x − 2)(x − 5) = 0.']],
+links:[['https://www.youtube.com/watch?v=2ZzuZvz33X0','Solving a quadratic equation by factoring (Khan Academy, 6 min)','Watch on 29 Nov before practising.'],['https://www.youtube.com/watch?v=hJOqGkWElNs','Addition elimination method (Khan Academy, about 4 min)','Short simultaneous-equations example.'],['https://www.youtube.com/watch?v=vA-55wZtLeE','Solving systems of equations by elimination (Khan Academy, about 13 min)','Longer, more examples.']]},
+
+lit:{ready:[[A,'Ch 10 The Adventure of the Speckled Band: taught, not studied'],[R,'Ch 2 Valjean Takes a Risk: not started in school yet'],[A,'Poem: To the Cuckoo: taught, not studied']],
+scope:'Prose: Ch 10 The Adventure of the Speckled Band, Ch 2 Valjean Takes a Risk. Poem: Ch 8 To the Cuckoo.',
+notes:`<div class="warnbox">School readers are often shortened. Read the textbook version and match names and events to these maps.</div>
+<h3>The Adventure of the Speckled Band (Arthur Conan Doyle, 1892)</h3>
+<div class="boxes"><div class="box"><b>Sherlock Holmes</b>Detective. Calm, observant, follows clues, not guesses.</div><div class="box"><b>Dr Watson</b>Holmes's friend and the narrator.</div><div class="box"><b>Helen Stoner</b>Frightened young woman who asks for help. About to marry.</div><div class="box"><b>Julia Stoner</b>Helen's twin. Died two years earlier, just before her wedding, crying "the speckled band!"</div><div class="box"><b>Dr Grimesby Roylott</b>Their violent stepfather at Stoke Moran. Had lived in India. Keeps a cheetah and a baboon.</div></div>
+<p><b>Motive:</b> the girls' mother left money to Roylott, but each daughter could claim a yearly income once married. Their marriages would have cost him money.</p>
+<h3>Clue chain</h3>
+<div class="flow"><span>Low whistle + metallic clang at night</span><em>→</em><span>Ventilator into Roylott's room</span><em>→</em><span>Dummy bell-rope that rings nothing</span><em>→</em><span>Bed clamped to the floor</span><em>→</em><span>Saucer of milk, iron safe, dog lash</span><em>→</em><span>A trained swamp adder from India</span></div>
+<p><b>Ending:</b> Holmes and Watson wait in the dark. When the snake slides down the rope, Holmes strikes at it. It goes back through the ventilator and bites Roylott, who dies.</p>
+<h3>Valjean Takes a Risk (from Les Misérables, Victor Hugo)</h3>
+<div class="flow"><span>Jean Valjean jailed for stealing bread</span><em>→</em><span>Released, a kind bishop urges him to be honest</span><em>→</em><span>He takes a coin from a boy, regrets it</span><em>→</em><span>Years later: Monsieur Madeleine, rich, respected factory owner</span><em>→</em><span>Old Fauchelevent trapped under his cart</span><em>→</em><span>Valjean lifts the cart and saves him</span></div>
+<p><b>The risk:</b> Inspector Javert is watching. Javert had known only one man strong enough to do such a thing: a convict named Jean Valjean. Saving the old man could expose who Madeleine really is and send him back to prison. He does it anyway.<br><b>Themes:</b> courage, compassion, a changed life, doing right at a cost.</p>
+<h3>To the Cuckoo (William Wordsworth, published 1807)</h3>
+<p><i>"O blithe New-comer! I have heard, / I hear thee and rejoice. / O Cuckoo! shall I call thee Bird, / Or but a wandering Voice?"</i></p>
+<table class="stack"><tr><th>Part</th><th>Meaning</th></tr><tr><td>Opening</td><td>The poet hears the cuckoo in spring and is joyful. He can hear it but not see it, so is it a bird or just a voice?</td></tr><tr><td>Middle</td><td>Lying on the grass, he hears its double call moving from hill to hill. It talks of sunshine and flowers but brings him memories.</td></tr><tr><td>Childhood</td><td>The same call he heard as a schoolboy, when he searched woods and grass for the bird and never found it.</td></tr><tr><td>End</td><td>Hearing it again brings back that golden time. The earth seems an "unsubstantial, faery place", a fit home for the bird.</td></tr></table>
+<div class="boxes"><div class="box"><b>Devices</b>Apostrophe: talks directly to the bird. Rhetorical question: "shall I call thee Bird...?" Metaphor: the cuckoo is "a wandering Voice", "a mystery".</div><div class="box"><b>Form</b>Four-line stanzas, rhyme scheme abab.</div><div class="box"><b>Theme</b>Nature brings back childhood joy and imagination.</div></div>`,
+cards:[['Who narrates the Speckled Band?','Dr Watson'],['Julia\'s last words?','"The speckled band!"'],['Roylott\'s motive?','Money: the daughters\' marriages would reduce his income'],['How did the snake reach the bed?','Through the ventilator and down the dummy bell-rope'],['What is the "speckled band"?','A swamp adder, a deadly snake'],['How does Roylott die?','Bitten by his own snake after Holmes drives it back'],['Valjean\'s new name?','Monsieur Madeleine'],['Who is trapped under the cart?','Old Father Fauchelevent'],['Why is lifting the cart a risk?','Inspector Javert knew only the convict Valjean had such strength'],['Why does the poet call the cuckoo "a wandering Voice"?','He hears it everywhere but cannot see it'],['What does the cuckoo remind the poet of?','His schoolboy days of searching for it'],['Rhyme scheme of To the Cuckoo?','abab']],
+quiz:[['Helen Stoner\'s stepfather is:',['Dr Watson','Dr Grimesby Roylott','Inspector Javert','Fauchelevent'],1,'He lives at Stoke Moran.'],['The bell-rope in Julia\'s room:',['Called the maid','Was a dummy','Was new','Opened the safe'],1,'It was connected to nothing.'],['Valjean saves Fauchelevent by:',['Calling the police','Lifting the cart','Paying a doctor','Pulling the horse'],1,'Huge strength gives him away.'],['"Shall I call thee Bird, Or but a wandering Voice?" is a:',['Simile','Rhetorical question','Onomatopoeia','Personification only'],1,'Asked for effect, no answer expected.'],['To the Cuckoo was written by:',['Keats','Wordsworth','Shelley','Tennyson'],1,'A Romantic nature poet.']],
+links:[['https://gutenberg.org/files/1661/1661-h/1661-h.htm','The Adventures of Sherlock Holmes, full text (Project Gutenberg)','Scroll to story VIII for the original Speckled Band.'],['https://poetryfoundation.org/poems/45562/to-the-cuckoo','To the Cuckoo, full poem (Poetry Foundation)','Read it aloud once; it\'s short.']]},
+
+chem:{ready:[[G,'Ch 6 Chemical Reactions (pp 70 to 77): revised, confident'],[A,'Ch 8 Water (pp 101 to 109): needs revision, not confident']],
+scope:'Ch 6 Chemical Reactions (pp 70 to 77, up to endothermic and exothermic reactions). Ch 8 Water (pp 101 to 109).',
+notes:`<h3>Ch 6: four types of reaction (think of partners dancing)</h3>
+<div class="boxes"><div class="box"><b>Combination</b>A + B → AB<br>2Mg + O₂ → 2MgO</div><div class="box"><b>Decomposition</b>AB → A + B<br>CaCO₃ → CaO + CO₂ (heat)</div><div class="box"><b>Displacement</b>A + BC → AC + B<br>Zn + CuSO₄ → ZnSO₄ + Cu</div><div class="box"><b>Double displacement</b>AB + CD → AD + CB<br>AgNO₃ + NaCl → AgCl↓ + NaNO₃</div></div>
+<p>Decomposition can need heat (thermal), electricity (electrolysis: 2H₂O → 2H₂ + O₂) or light (2AgBr → 2Ag + Br₂).</p>
+<div class="flow"><span><b>Signs a reaction happened:</b></span><span>colour change</span><span>gas given off</span><span>precipitate forms</span><span>change of state</span><span>heat or light change</span></div>
+<div class="flow"><span><b>Conditions that help:</b></span><span>contact</span><span>heat</span><span>light</span><span>electricity</span><span>catalyst</span><span>pressure</span><span>solution</span></div>
+<div class="boxes"><div class="box"><b>Exothermic: heat given out</b>C + O₂ → CO₂ + heat. Burning, respiration, quicklime + water.</div><div class="box"><b>Endothermic: heat taken in</b>N₂ + O₂ → 2NO (absorbs heat). Photosynthesis, heating limestone.</div></div>
+<h3>Ch 8 Water: ideas these chapters usually cover</h3>
+<div class="warnbox">I couldn't see pages 101 to 109 of his book. Tick off only the points that appear on those pages.</div>
+<div class="boxes"><div class="box"><b>Solution</b>Solute dissolved in solvent. Water is the "universal solvent".</div><div class="box"><b>Saturated / unsaturated</b>Saturated: can't dissolve more at that temperature. Most solids dissolve more in hot water.</div><div class="box"><b>Water of crystallisation</b>Water inside crystals. Blue vitriol CuSO₄·5H₂O turns white when heated (anhydrous).</div><div class="box"><b>Hard water</b>Temporary (bicarbonates of Ca, Mg): removed by boiling. Permanent (sulphates, chlorides): removed by washing soda.</div><div class="box"><b>Composition</b>Hydrogen : oxygen = 2 : 1 by volume, 1 : 8 by mass.</div></div>`,
+cards:[['A + B → AB is called?','Combination'],['Zn + CuSO₄ → ZnSO₄ + Cu is?','Displacement'],['AgNO₃ + NaCl → ? (white precipitate)','AgCl + NaNO₃ (double displacement)'],['Decomposition by electricity is called?','Electrolysis'],['Exothermic means?','Heat is given out'],['Example of endothermic reaction?','N₂ + O₂ → 2NO, or photosynthesis'],['Name 3 signs of a chemical reaction','Colour change, gas evolved, precipitate (also temperature or state change)'],['Formula of blue vitriol?','CuSO₄·5H₂O'],['How is temporary hardness removed?','By boiling']],
+quiz:[['CaCO₃ → CaO + CO₂ is a:',['Combination','Decomposition','Displacement','Neutralisation'],1,'One substance breaks into two.'],['Burning of coal is:',['Endothermic','Exothermic','Neither','Photolytic'],1,'Heat is given out.'],['A more reactive metal pushing out a less reactive one is:',['Displacement','Combination','Decomposition','Precipitation'],0,'Zinc pushes out copper.'],['The insoluble solid formed in a reaction is a:',['Catalyst','Solvent','Precipitate','Crystal'],2,'Like white AgCl.']],
+links:[['https://www.khanacademy.org/science/hs-chemistry/x2613d8165d88df5e:chemical-reactions/x2613d8165d88df5e:energy-of-chemical-reactions/v/endothermic-and-exothermic-reactions','Endothermic and exothermic reactions (Khan Academy)','Short video on heat in and heat out.']]},
+
+phy:{ready:[[R,'Ch 8 Electricity in Our Lives: not completed in school, not studied']],
+scope:'Ch 8 Electricity in Our Lives: static electricity, charges, conservation of charge, conductors and insulators, charging an object, electroscope, lightning, electrical energy and power, electricity at home, electrical hazards, safety components, precautions and rules.',
+notes:`<div class="warnbox">Not finished in school yet. Learn only up to where the teacher has reached, plus anything in the portion list.</div>
+<h3>Static electricity: the rules</h3>
+<div class="fig"><svg viewBox="0 0 520 120" role="img" aria-label="Like charges repel, unlike charges attract">
+<g font-size="22" font-weight="700" text-anchor="middle" fill="#fff">
+<circle cx="50" cy="50" r="24" fill="#d64535"/><text x="50" y="58">+</text><circle cx="150" cy="50" r="24" fill="#d64535"/><text x="150" y="58">+</text>
+<circle cx="320" cy="50" r="24" fill="#d64535"/><text x="320" y="58">+</text><circle cx="400" cy="50" r="24" fill="#0089b3"/><text x="400" y="58">−</text></g>
+<g stroke="currentColor" stroke-width="2.5" fill="none"><path d="M18 50 h-12 m6 -6 l-6 6 6 6"/><path d="M182 50 h12 m-6 -6 l6 6 -6 6"/><path d="M350 50 h18 m-6 -6 l6 6 -6 6"/><path d="M372 50 h-4"/></g>
+<g font-size="15" fill="currentColor" text-anchor="middle"><text x="100" y="105">Like charges repel</text><text x="360" y="105">Unlike charges attract</text></g></svg></div>
+<div class="boxes"><div class="box"><b>Charging by friction</b>Rub glass with silk: glass +, silk −. Rub plastic/ebonite with wool or fur: plastic −. Only electrons (−) move.</div><div class="box"><b>Conduction</b>Touch a charged body to a neutral one: it gets the SAME charge.</div><div class="box"><b>Induction</b>Bring a charged body NEAR (no touch): opposite charge appears on the near side.</div><div class="box"><b>Conservation of charge</b>Charge cannot be made or destroyed, only moved from one body to another.</div></div>
+<div class="boxes"><div class="box"><b>Conductors</b>Let charge flow: copper, aluminium, human body, tap water, earth.</div><div class="box"><b>Insulators</b>Don't: rubber, plastic, glass, dry wood.</div></div>
+<h3>Electroscope</h3>
+<div class="flow"><span>Metal disc on top</span><em>→</em><span>Metal rod inside a glass jar</span><em>→</em><span>Two thin gold/aluminium leaves</span><em>→</em><span>Charged body touches disc: leaves get same charge and spread apart</span></div>
+<h3>Lightning</h3>
+<p>Charges build up in clouds; when enough collect, a giant spark jumps between clouds or to the ground. A lightning conductor (metal rod on top of a tall building, wired to the earth) carries the charge safely to the ground.</p>
+<div class="boxes"><div class="box"><b>Do</b>Go indoors or into a closed car. In the open, crouch low, feet together.</div><div class="box"><b>Don't</b>Stand under a tall tree, hold an umbrella or metal pole, swim, or use a landline.</div></div>
+<h3>Energy and power</h3>
+<div class="flow"><span>Power P = V × I (watt)</span><span>Energy = Power × time</span><span>1 unit = 1 kWh = 3.6 × 10⁶ J</span></div>
+<div class="tip">Example: a 100 W bulb for 5 hours a day for 30 days = 100 × 5 × 30 = 15,000 Wh = <b>15 kWh (15 units)</b>. At ₹5 per unit = ₹75. Always change W to kW (÷ 1000).</div>
+<h3>Electricity at home</h3>
+<table class="stack"><tr><th>Wire</th><th>Colour</th><th>Job</th></tr><tr><td>Live</td><td>Red (new: brown)</td><td>Brings current in</td></tr><tr><td>Neutral</td><td>Black (new: light blue)</td><td>Return path</td></tr><tr><td>Earth</td><td>Green (or green-yellow)</td><td>Safety: leaks current to the ground</td></tr></table>
+<div class="boxes"><div class="box"><b>Hazards</b>Short circuit (live touches neutral), overloading (too many appliances on one socket), damaged insulation, wet hands.</div><div class="box"><b>Safety parts</b>Fuse: thin wire that melts if current is too high. MCB: switch that trips automatically. Earthing: protects from shocks on metal bodies.</div><div class="box"><b>Rules</b>Switch off before repairs, dry hands, no overloading, use ISI-marked items, never pull a plug by its wire.</div></div>`,
+cards:[['Like charges ___, unlike charges ___','Repel, attract'],['Glass rubbed with silk: glass gets?','Positive charge'],['Which particles move when objects are charged?','Electrons'],['Charging by conduction gives what charge?','The same charge as the charging body'],['Charging by induction needs contact?','No: bring it near'],['Law of conservation of charge?','Charge can\'t be created or destroyed, only transferred'],['What does an electroscope do?','Detects charge: the leaves spread apart'],['Formula for power?','P = V × I'],['1 kWh in joules?','3.6 × 10⁶ J'],['Colour of earth wire?','Green'],['What is a fuse?','A thin wire that melts and breaks the circuit if current is too high'],['Safest place in a thunderstorm?','Inside a building or a closed car']],
+quiz:[['A plastic comb rubbed in dry hair attracts paper because it is:',['Magnetised','Charged','Heated','Wet'],1,'Static charge by friction.'],['Leaves of an electroscope spread because they have:',['Opposite charges','The same charge','No charge','Magnetism'],1,'Like charges repel.'],['Which is a conductor?',['Rubber','Glass','Copper','Dry wood'],2,'Metals conduct.'],['A 2000 W heater runs for 3 h. Energy used:',['6 kWh','600 kWh','0.6 kWh','2 kWh'],0,'2 kW × 3 h.'],['Short circuit happens when:',['Live touches neutral','Fuse is new','Earth wire is green','Switch is off'],0,'Resistance drops, current shoots up.']],
+links:[['https://phet.colorado.edu/en/simulations/balloons-and-static-electricity','Balloons and Static Electricity (PhET simulation)','Play: rub a balloon on a sweater and watch charges move. Free, runs in the browser.'],['https://www.physicsclassroom.com/video-tutorial/static-electricity/charging-by-induction','Charging by induction (The Physics Classroom)','Video with animations.'],['https://flippingphysics.com/conduction-and-induction.html','Charging by conduction and induction with an electroscope (Flipping Physics, 13 min)','Real electroscope demo.']]},
+
+geo:{ready:[[A,'Ch 1 Interpretation of Topographical Map: taught, not revised'],[A,'Ch 8 India: Climate (till p 114): taught, not revised']],
+scope:'Ch 1 Interpretation of the topographical map (four-figure grid, settlements, drainage pattern, contours, conventional signs and symbols). Ch 8 India: Climate (till page 114).',
+notes:`<h3>Four-figure grid reference: play it</h3>
+<p>Rule: <b>Eastings first, then Northings</b> ("along the corridor, then up the stairs"). Use the numbers on the lines at the bottom-left corner of the square.</p>
+<div id="gridgame"></div>
+<h3>Conventional colours (Survey of India maps)</h3>
+<table class="stack"><tr><th>Colour</th><th>Shows</th></tr><tr><td>Blue</td><td>Water: rivers, tanks, wells</td></tr><tr><td>Green</td><td>Woodland, vegetation</td></tr><tr><td>Yellow</td><td>Cultivated land</td></tr><tr><td>White</td><td>Uncultivated land</td></tr><tr><td>Brown</td><td>Contours, sand features</td></tr><tr><td>Red</td><td>Settlements, roads, cart tracks</td></tr><tr><td>Black</td><td>Railways, boundaries, names, broken ground</td></tr></table>
+<div class="boxes"><div class="box"><b>Settlements</b>Compact/nucleated (clustered), scattered/dispersed (spread out), linear (along a road, river or canal).</div><div class="box"><b>Drainage patterns</b>Dendritic: like tree branches. Radial: streams flow out from a high point. Trellis: parallel streams, tributaries join at right angles. Centripetal: streams flow into a central low area.</div><div class="box"><b>Contours</b>Brown lines joining points of equal height. Close together = steep slope. Far apart = gentle slope.</div></div>
+<h3>Ch 8 India: Climate</h3>
+<p>India has a <b>tropical monsoon</b> climate.</p>
+<div class="flow"><span><b>Factors:</b></span><span>Latitude (Tropic of Cancer)</span><span>Himalayas block cold winds</span><span>Distance from the sea</span><span>Altitude</span><span>Monsoon winds</span><span>Jet streams</span></div>
+<table class="stack"><tr><th>Season</th><th>Months</th><th>Key points</th></tr><tr><td>Cold weather</td><td>Dec to Feb</td><td>Western disturbances bring winter rain to the north-west</td></tr><tr><td>Hot weather</td><td>Mar to May</td><td>Loo (hot dry wind) in the north; mango showers in Kerala and Karnataka; Kalbaisakhi (nor'westers) in West Bengal and Assam</td></tr><tr><td>South-west monsoon</td><td>Jun to Sep</td><td>Most of India's rain. Mawsynram (Meghalaya) gets very heavy rain.</td></tr><tr><td>Retreating monsoon</td><td>Oct to Nov</td><td>Tamil Nadu coast gets rain from the north-east monsoon</td></tr></table>
+<div class="warnbox">Your portion stops at page 114. Tick off only what appears up to there.</div>`,
+cards:[['In a grid reference, which comes first?','Eastings (vertical lines, numbers along the bottom)'],['Eastings are which lines?','Vertical lines; their numbers increase eastward'],['Blue on a toposheet?','Water features'],['Yellow on a toposheet?','Cultivated land'],['Brown lines?','Contours'],['Contours close together mean?','Steep slope'],['Tree-branch drainage pattern?','Dendritic'],['Streams flowing out from a hill in all directions?','Radial'],['Settlement along a road?','Linear'],['India\'s climate type?','Tropical monsoon'],['Which coast gets rain in Oct to Nov?','Tamil Nadu (Coromandel) coast'],['Hot dry wind of north India in May?','Loo']],
+quiz:[['Which colour shows settlements?',['Blue','Red','Green','Yellow'],1,'Red: settlements and roads.'],['Streams joining at right angles, in parallel lines:',['Dendritic','Radial','Trellis','Centripetal'],2,'Like a garden trellis.'],['Widely spaced contours show a:',['Cliff','Steep slope','Gentle slope','River'],2,'Height changes slowly.'],['Mango showers occur in:',['Punjab','Kerala and Karnataka','Rajasthan','Bihar'],1,'Pre-monsoon showers.']],
+links:[['https://www.thenational.academy/pupils/lessons/four-and-six-figure-grid-references/video','Four and six-figure grid references (Oak National Academy)','Video with practice tasks. Focus on the four-figure part.']]},
+
+hin:{ready:[[A,'All Hindi portions: need revision']],
+scope:'पाठ 9 हाथों का मूल्य, पाठ 11 सर विलियम जोंस ने संस्कृत कैसे सीखी। व्याकरण: विलोम, पर्यायवाची शब्द, अनेक शब्दों के लिए एक शब्द, कारक, क्रियाविशेषण। अपठित गद्यांश, picture composition.',
+notes:`<div class="warnbox">For the two lessons, use the textbook: after reading, write a 5-line summary and 5 questions with answers. The notes below are for grammar.</div>
+<h3 lang="hi">कारक: 8 कारक और उनके चिह्न</h3>
+<table class="stack" lang="hi"><tr><th>कारक</th><th>चिह्न</th><th>उदाहरण</th></tr><tr><td>कर्ता</td><td>ने</td><td>राम ने खाना खाया।</td></tr><tr><td>कर्म</td><td>को</td><td>माँ ने बच्चे को बुलाया।</td></tr><tr><td>करण</td><td>से, के द्वारा</td><td>वह कलम से लिखता है।</td></tr><tr><td>संप्रदान</td><td>को, के लिए</td><td>गरीबों के लिए कपड़े लाओ।</td></tr><tr><td>अपादान</td><td>से (अलग होना)</td><td>पेड़ से पत्ता गिरा।</td></tr><tr><td>संबंध</td><td>का, के, की</td><td>यह राम की किताब है।</td></tr><tr><td>अधिकरण</td><td>में, पर</td><td>मेज़ पर किताब है।</td></tr><tr><td>संबोधन</td><td>हे, अरे</td><td>अरे बच्चो, इधर आओ!</td></tr></table>
+<div class="tip">करण "से" = किसकी मदद से (कलम से)। अपादान "से" = किससे अलग (पेड़ से)। Ask: help or separation?</div>
+<h3 lang="hi">क्रियाविशेषण: 4 प्रकार</h3>
+<div class="boxes" lang="hi"><div class="box"><b>कालवाचक (कब?)</b>आज, कल, अभी, रोज़</div><div class="box"><b>स्थानवाचक (कहाँ?)</b>यहाँ, वहाँ, ऊपर, अंदर</div><div class="box"><b>रीतिवाचक (कैसे?)</b>धीरे-धीरे, अचानक, ध्यान से</div><div class="box"><b>परिमाणवाचक (कितना?)</b>बहुत, थोड़ा, कम, ज़्यादा</div></div>
+<h3 lang="hi">शब्द भंडार</h3>
+<div class="boxes" lang="hi"><div class="box"><b>विलोम</b>आशा – निराशा<br>सुख – दुःख<br>आदर – अनादर<br>आय – व्यय</div><div class="box"><b>पर्यायवाची</b>जल – पानी, नीर<br>सूर्य – रवि, दिनकर<br>पृथ्वी – धरती, भूमि</div><div class="box"><b>अनेक शब्दों के लिए एक शब्द</b>जो ईश्वर को माने – आस्तिक<br>जिसका अंत न हो – अनंत<br>जो कम बोले – मितभाषी<br>जो पढ़ा-लिखा न हो – निरक्षर</div></div>
+<p><b>Picture composition:</b> 1 line on what the picture shows, 4 to 6 lines describing people, place and action, 1 to 2 lines on the feeling or message. Use simple, correct sentences.</p>`,
+cards:[['कर्ता कारक का चिह्न?','ने'],['अपादान कारक का चिह्न और अर्थ?','से: अलग होना (पेड़ से पत्ता गिरा)'],['करण कारक का चिह्न?','से, के द्वारा (कलम से)'],['अधिकरण कारक के चिह्न?','में, पर'],['संप्रदान कारक के चिह्न?','को, के लिए'],['"धीरे-धीरे" कौन सा क्रियाविशेषण?','रीतिवाचक'],['"कल" कौन सा क्रियाविशेषण?','कालवाचक'],['"बहुत" कौन सा क्रियाविशेषण?','परिमाणवाचक'],['आशा का विलोम?','निराशा'],['जल के दो पर्यायवाची?','पानी, नीर'],['जिसका अंत न हो?','अनंत']],
+quiz:[['"पेड़ से पत्ता गिरा" में कारक:',['करण','अपादान','कर्म','संबंध'],1,'अलग होने का भाव।'],['"वह यहाँ बैठा है" में क्रियाविशेषण:',['कालवाचक','स्थानवाचक','रीतिवाचक','परिमाणवाचक'],1,'यहाँ = कहाँ?'],['"सुख" का विलोम:',['दुःख','आनंद','हर्ष','खुशी'],0,''],['जो ईश्वर में विश्वास करे:',['नास्तिक','आस्तिक','अनंत','निरक्षर'],1,'']],
+links:[]},
+
+kan:{ready:[[A,'All revised, needs more revision']],
+scope:'Lesson 5 Enaadaru Maadi, Doorabedi. Grammar: word meanings, make sentences, singular and plural, opposite words, gender, anyadeshiya padagalu. Number names 141 to 160.',
+notes:`<div class="warnbox">I haven't written Kannada content here because I couldn't check it against his textbook. Use the textbook and notebook for these routines.</div>
+<div class="boxes"><div class="box"><b>Word meanings</b>Make flip cards on paper: Kannada word on front, meaning on back. 10 a day, mix old and new.</div><div class="box"><b>Make sentences</b>One short sentence per word. Say it aloud before writing.</div><div class="box"><b>Singular/plural, opposites, gender</b>Two-column lists. Cover one column, recall the other.</div><div class="box"><b>Number names 141 to 160</b>Say them aloud while walking, then write all 20 once. Check spelling against the book.</div></div>
+<p>Sittings: 30 Nov, 1 Dec, 5 Dec and 6 Dec in the plan. The exam is on 7 Dec, the same day as Maths.</p>`,
+cards:[],quiz:[],links:[]}
+};
+const ORDER=['hist','bio','engl','math','lit','chem','geo','phy','hin','kan'];
+let cur=S.get('ut2.sub','hist');if(!D[cur])cur='hist';
+const fcIdx={};
+function renderSubject(){
+ S.set('ut2.sub',cur);
+ document.getElementById('spills').innerHTML=ORDER.map(k=>`<button class="pill${k===cur?' on':''}" style="--c:var(${SUB[k][1]})" data-k="${k}">${esc(SUB[k][0])}</button>`).join('');
+ const d=D[cur],c=SUB[cur][1],ex=EX.find(e=>e[3]===cur)||(cur==='kan'?EX[3]:null);
+ const known=S.get('ut2.known',{});
+ const i=fcIdx[cur]||0;
+ let h=`<div style="--c:var(${c})"><h2>${esc(SUB[cur][0])}${ex?` <span class="exam">${ex[1]}</span>`:''}</h2>
+ <p class="foot">${esc(d.scope)}</p>
+ <div class="card"><b>Where he stands (from your sheet)</b><div class="ready">${d.ready.map(r=>`<div><span class="dot" style="--d:${r[0]}"></span>${esc(r[1])}</div>`).join('')}</div></div>
+ <div class="notes" style="margin-top:14px">${d.notes}</div>`;
+ if(d.cards.length){const kn=d.cards.filter((x,j)=>known[cur+j]).length;
+  h+=`<h3>Flip cards <span class="foot">(${kn}/${d.cards.length} marked "got it")</span></h3><div class="flash"><div class="fc" id="fc"><div class="f">${esc(d.cards[i][0])}</div><div class="b">${esc(d.cards[i][1])}</div></div></div>
+  <div class="row"><button id="fprev">← Prev</button><span class="foot">${i+1} / ${d.cards.length} · tap card to flip</span><button id="fnext">Next →</button><button id="fgot">${known[cur+i]?'✔ Got it':'Mark got it'}</button></div>`}
+ if(d.quiz.length){h+=`<h3>Quick quiz</h3><div id="quiz">${d.quiz.map((q,qi)=>`<div class="q"><b>${qi+1}. ${esc(q[0])}</b><div class="opts">${q[1].map((o,oi)=>`<button data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}</div><div class="why" id="why${qi}"></div></div>`).join('')}</div><p class="fb" id="qscore"></p>`}
+ if(d.links.length)h+=`<h3>Watch / read</h3><div class="links">${d.links.map(l=>`<a href="${l[0]}" target="_blank" rel="noopener">${esc(l[1])}<small>${esc(l[2])}</small></a>`).join('')}</div>`;
+ h+='</div>';
+ document.getElementById('subject').innerHTML=h;
+ if(d.cards.length){
+  document.getElementById('fc').onclick=e=>e.currentTarget.classList.toggle('flip');
+  document.getElementById('fprev').onclick=()=>{fcIdx[cur]=(i-1+d.cards.length)%d.cards.length;renderSubject()};
+  document.getElementById('fnext').onclick=()=>{fcIdx[cur]=(i+1)%d.cards.length;renderSubject()};
+  document.getElementById('fgot').onclick=()=>{known[cur+i]=!known[cur+i];S.set('ut2.known',known);fcIdx[cur]=(i+1)%d.cards.length;renderSubject()};
+ }
+ if(d.quiz.length){const ans={};document.getElementById('quiz').onclick=e=>{const b=e.target.closest('[data-q]');if(!b)return;const qi=+b.dataset.q,oi=+b.dataset.o;if(qi in ans)return;ans[qi]=oi;const q=d.quiz[qi];
+  b.parentNode.querySelectorAll('button').forEach((x,xi)=>{if(xi===q[2])x.classList.add('r');else if(xi===oi)x.classList.add('w')});
+  document.getElementById('why'+qi).textContent=(oi===q[2]?'Right. ':'Not quite. ')+q[3];
+  const n=Object.keys(ans).length,sc=Object.entries(ans).filter(([a,o])=>d.quiz[a][2]===o).length;document.getElementById('qscore').textContent='Score: '+sc+' / '+n+(n===d.quiz.length?(sc===n?' Perfect.':' Flip the cards for the ones you missed.'):'')}}
+ if(cur==='geo')gridGame();
+}
+document.getElementById('spills').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){cur=b.dataset.k;renderSubject()}});
+
+/* grid reference game */
+function gridGame(){
+ const el=document.getElementById('gridgame');if(!el)return;
+ const E0=42,N0=17,n=5,icons=[['Temple',1,3],['Well',3,1],['Post office',0,0],['School',4,2],['Bridge',2,4]];
+ let target=Math.floor(Math.random()*icons.length);
+ const draw=()=>{const cell=56,pad=40,W=pad+n*cell+10,H=n*cell+pad+10;let s=`<svg viewBox="0 0 ${W} ${H}" style="max-width:420px;width:100%" role="img" aria-label="Grid reference practice map">`;
+  s+=`<rect x="${pad}" y="10" width="${n*cell}" height="${n*cell}" fill="color-mix(in srgb,#f5e9a8 40%,transparent)"/>`;
+  for(let k=0;k<=n;k++){s+=`<line x1="${pad+k*cell}" y1="10" x2="${pad+k*cell}" y2="${10+n*cell}" stroke="#c0392b" stroke-width="1.2"/><line x1="${pad}" y1="${10+k*cell}" x2="${pad+n*cell}" y2="${10+k*cell}" stroke="#c0392b" stroke-width="1.2"/>`;
+   if(k<n){s+=`<text x="${pad+k*cell}" y="${H-8}" font-size="13" text-anchor="middle" fill="currentColor">${E0+k}</text><text x="${pad-8}" y="${10+(n-k)*cell+4}" font-size="13" text-anchor="end" fill="currentColor">${N0+k}</text>`}}
+  icons.forEach(([nm,e,nn],j)=>{const x=pad+e*cell+cell/2,y=10+(n-1-nn)*cell+cell/2;s+=`<circle cx="${x}" cy="${y}" r="9" fill="${j===target?'#ffe14d':'#0d4a47'}" stroke="#0d4a47" stroke-width="2"/><text x="${x}" y="${y+24}" font-size="10" text-anchor="middle" fill="currentColor">${nm}</text>`});
+  s+='</svg>';
+  el.innerHTML=s+`<p>What is the four-figure grid reference of the <b>${icons[target][0]}</b> (yellow)?</p><form class="row" id="gform"><input id="gin" inputmode="numeric" maxlength="4" placeholder="e.g. 4318" aria-label="Grid reference"><button>Check</button><button type="button" id="gnew">New place</button></form><p class="fb" id="gfb"></p>`;
+  document.getElementById('gform').onsubmit=ev=>{ev.preventDefault();const t=icons[target],ans=''+(E0+t[1])+(N0+t[2]),v=document.getElementById('gin').value.trim();
+   document.getElementById('gfb').textContent=v===ans?'Correct: '+ans+'. Easting '+(E0+t[1])+', northing '+(N0+t[2])+'.':'Not yet. Find the line to the LEFT of the square (easting, along the bottom) first, then the line BELOW it (northing, up the side).'};
+  document.getElementById('gnew').onclick=()=>{target=(target+1+Math.floor(Math.random()*(icons.length-1)))%icons.length;draw()}};
+ draw();
+}
+
+/* ---------- MATHS LAB ---------- */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const nz=(a,b)=>{let v=0;while(v===0)v=rnd(a,b);return v};
+const term=(c,v,first)=>{if(c===0)return '';const a=Math.abs(c),body=v?(a===1?v:a+v):''+a;return first?(c<0?'−':'')+body:(c<0?' − ':' + ')+body};
+const expr=ts=>{let s='';ts.forEach(([c,v])=>{const t=term(c,v,s==='');s+=t});return s||'0'};
+const MODES={lin:'Linear',sim:'Simultaneous',quad:'Quadratic',fac:'Factorise'};
+let mode='lin',P=null,score=S.get('ut2.mscore',{r:0,t:0});
+function newProb(){
+ if(mode==='lin'){const x=nz(-9,9),a=rnd(2,9);let c=rnd(1,9);while(c===a)c=rnd(1,9);const b=rnd(-12,12),d=(a-c)*x+b;P={q:expr([[a,'x'],[b,'']])+' = '+expr([[c,'x'],[d,'']]),f:['x'],ans:[x],hint:`Move ${c===1?'':c}x to the left and ${b} to the right: ${a-c}x = ${d-b}. Divide by ${a-c}.`}}
+ else if(mode==='sim'){let x,y,a1,b1,a2,b2;do{x=rnd(-6,6);y=rnd(-6,6);a1=nz(-5,5);b1=nz(-5,5);a2=nz(-5,5);b2=nz(-5,5)}while(a1*b2-a2*b1===0);
+  P={q:expr([[a1,'x'],[b1,'y']])+' = '+expr([[a1*x+b1*y,'']])+'<br>'+expr([[a2,'x'],[b2,'y']])+' = '+expr([[a2*x+b2*y,'']]),f:['x','y'],ans:[x,y],hint:'Multiply so the y-coefficients match (or the x ones), add or subtract to remove one letter, solve, then put back. Check in BOTH equations.'}}
+ else{let p=nz(-9,9),q=nz(-9,9);const b=-(p+q),c=p*q;
+  if(mode==='quad')P={q:expr([[1,'x²'],[b,'x'],[c,'']])+' = 0',f:['x₁','x₂'],ans:[p,q],any:true,hint:`Find two numbers that multiply to ${c} and add to ${b}. It factorises as (x ${-p<0?'−':'+'} ${Math.abs(p)})(x ${-q<0?'−':'+'} ${Math.abs(q)}) = 0, so set each bracket to 0.`};
+  else P={q:'Factorise: '+expr([[1,'x²'],[b,'x'],[c,'']]),f:['(x + ?)','(x + ?)'],ans:[-p,-q],any:true,hint:`Two numbers: product ${c}, sum ${b}. Type the two numbers that go in the brackets (x + ☐)(x + ☐). A minus number means (x − ...).`}}
+ document.getElementById('prob').innerHTML=P.q;
+ document.getElementById('mform').innerHTML=P.f.map((f,i)=>`<label>${f} = <input id="mi${i}" inputmode="numeric" aria-label="${f}"></label>`).join('')+'<button>Check</button><button type="button" id="mnew">New question</button>';
+ document.getElementById('mfb').textContent='';
+ document.getElementById('mnew').onclick=newProb;
+}
+document.getElementById('mmodes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="pill${k===mode?' on':''}" style="--c:var(--math)" data-m="${k}">${v}</button>`).join('');
+document.getElementById('mmodes').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;mode=b.dataset.m;document.querySelectorAll('#mmodes .pill').forEach(x=>x.classList.toggle('on',x===b));newProb()};
+document.getElementById('mform').onsubmit=e=>{e.preventDefault();
+ const v=P.f.map((f,i)=>parseFloat((document.getElementById('mi'+i).value||'').replace(/[−–]/g,'-')));
+ if(v.some(isNaN)){document.getElementById('mfb').textContent='Fill in every box first.';return}
+ let ok;if(P.any){const a=[...P.ans].sort((m,n)=>m-n),b=[...v].sort((m,n)=>m-n);ok=a[0]===b[0]&&a[1]===b[1]}else ok=P.ans.every((x,i)=>x===v[i]);
+ score.t++;if(ok)score.r++;S.set('ut2.mscore',score);
+ const fb=document.getElementById('mfb');fb.style.color=ok?'var(--ok)':'var(--bad)';
+ fb.textContent=ok?'Correct. Did you plug it back in? Next one.':'Not quite. '+P.hint+' Then log the mistake type below.';
+ document.getElementById('mscore').textContent='Total: '+score.r+' right out of '+score.t+' tries.';
+ if(ok)setTimeout(newProb,1400)};
+document.getElementById('mscore').textContent=score.t?'Total: '+score.r+' right out of '+score.t+' tries.':'';
+newProb();
+
+/* mistake log */
+let log=S.get('ut2.log',[]);
+function renderLog(){const types=['Sign error','Copied wrongly','Times-table / arithmetic slip','Wrong method','Did not check','Did not finish (time)'];const cnt=types.map(t=>log.filter(l=>l.t===t).length),mx=Math.max(1,...cnt);
+ document.getElementById('logbars').innerHTML=log.length?types.map((t,i)=>`<div><span>${t}</span><span><i style="width:${cnt[i]/mx*100}%"></i></span><b>${cnt[i]}</b></div>`).join('')+`<p class="foot">Latest: ${log.slice(-3).reverse().map(l=>esc(l.d+' · '+l.t+(l.n?' · '+l.n:''))).join('<br>')}</p><button type="button" id="lundo">Undo last</button>`:'<p class="foot">No mistakes logged yet.</p>';
+ const u=document.getElementById('lundo');if(u)u.onclick=()=>{log.pop();S.set('ut2.log',log);renderLog()}}
+document.getElementById('logf').onsubmit=e=>{e.preventDefault();log.push({t:document.getElementById('ltype').value,n:document.getElementById('lnote').value.trim(),d:today});S.set('ut2.log',log);document.getElementById('lnote').value='';renderLog()};
+renderLog();
+
+/* ---------- ROUTING ---------- */
+function route(){const h=(location.hash||'#plan').slice(1);const v=['plan','notes','maths','parents'].includes(h)?h:'plan';
+ document.querySelectorAll('section[data-view]').forEach(s=>s.classList.toggle('on',s.dataset.view===v));
+ document.querySelectorAll('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===v));
+ if(v==='notes')renderSubject()}
+window.addEventListener('hashchange',route);
+renderPlan();renderSubject();route();
+}
+</script>
+</body>
+</html>
